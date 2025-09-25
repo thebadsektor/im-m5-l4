@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Module 5: Database Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            color: #1f2937;
+        }
+
+        .slide-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .slide {
+            background-color: white;
+            padding: 2.5rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            max-width: 900px;
+            width: 100%;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            animation: fadeIn 0.8s ease-in-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .slide-active {
+            display: flex;
+        }
+
+        .nav-button {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: #4f46e5;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            transition: all 0.3s ease-in-out;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .nav-button:hover {
+            background-color: #4338ca;
+            transform: translateY(-50%) scale(1.05);
+        }
+
+        .nav-button.left {
+            left: 2rem;
+        }
+
+        .nav-button.right {
+            right: 2rem;
+        }
+
+        .slide-content h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 1rem;
+        }
+
+        .slide-content h2 {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 1rem;
+        }
+
+        .slide-content p {
+            font-size: 1.125rem;
+            line-height: 1.75rem;
+            margin-bottom: 1rem;
+            color: #4b5563;
+        }
+
+        .slide-content ul {
+            list-style: none;
+            text-align: left;
+            margin: 0 auto;
+        }
+
+        .slide-content li {
+            position: relative;
+            padding-left: 1.5rem;
+            margin-bottom: 0.5rem;
+            font-size: 1.125rem;
+            color: #374151;
+        }
+
+        .slide-content li::before {
+            content: '•';
+            color: #4f46e5;
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+
+        .analogy-box {
+            background-color: #e0f2fe;
+            border: 2px solid #38bdf8;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            text-align: left;
+        }
+
+        .analogy-box h3 {
+            font-weight: 600;
+            font-size: 1.25rem;
+            color: #0c4a6e;
+            margin-bottom: 0.5rem;
+        }
+
+        .analogy-box p {
+            font-size: 1rem;
+            line-height: 1.5rem;
+            color: #0e7490;
+        }
+
+        .interactive-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 2rem;
+        }
+
+        .table-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .db-table {
+            border-collapse: collapse;
+            width: 100%;
+            max-width: 700px;
+            margin: 0 auto;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .db-table th, .db-table td {
+            border: 1px solid #d1d5db;
+            padding: 0.75rem;
+            text-align: center;
+        }
+
+        .db-table th {
+            background-color: #4f46e5;
+            color: white;
+            font-weight: 600;
+        }
+
+        .db-table td {
+            background-color: white;
+        }
+
+        .highlight-pk {
+            background-color: #fef3c7;
+            animation: highlight-pk-anim 1s ease-in-out infinite alternate;
+        }
+
+        .highlight-fk {
+            background-color: #dbeafe;
+            animation: highlight-fk-anim 1s ease-in-out infinite alternate;
+        }
+
+        .link-line {
+            position: absolute;
+            height: 2px;
+            background-color: #4f46e5;
+            display: none;
+            z-index: 10;
+            transition: all 0.5s ease-in-out;
+        }
+
+        @keyframes highlight-pk-anim {
+            from {
+                background-color: #fef3c7;
+            }
+            to {
+                background-color: #fde68a;
+            }
+        }
+
+        @keyframes highlight-fk-anim {
+            from {
+                background-color: #dbeafe;
+            }
+            to {
+                background-color: #bfdbfe;
+            }
+        }
+
+        .typewriter-text {
+            border-right: 2px solid #4f46e5;
+            white-space: nowrap;
+            overflow: hidden;
+            display: inline-block;
+            animation: typing 2s steps(40, end), blink-caret 0.75s step-end infinite;
+        }
+
+        @keyframes typing {
+            from { width: 0 }
+            to { width: 100% }
+        }
+
+        @keyframes blink-caret {
+            from, to { border-color: transparent }
+            50% { border-color: #4f46e5; }
+        }
+
+        .key-legend {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 1rem;
+        }
+        .key-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+        .color-box {
+            width: 1.25rem;
+            height: 1.25rem;
+            border-radius: 0.25rem;
+        }
+        .pk-color { background-color: #fde68a; }
+        .fk-color { background-color: #bfdbfe; }
+
+        /* Spotify Theme */
+        .spotify-theme {
+            background-color: #191414;
+        }
+        .spotify-theme h2, .spotify-theme h3, .spotify-theme p, .spotify-theme .key-item {
+            color: #ffffff;
+        }
+        .spotify-theme .db-table th {
+            color: #ffffff;
+        }
+        .spotify-theme .db-table td {
+            background-color: #282828;
+            color: #ffffff;
+            border-color: #404040;
+        }
+        .spotify-pk { background-color: #1DB954; }
+        .spotify-fk { background-color: #535353; }
+        .spotify-pk-color { background-color: #1DB954; }
+        .spotify-fk-color { background-color: #535353; }
+        .highlight-key {
+            animation: spotify-highlight 1s ease-in-out infinite alternate;
+        }
+        @keyframes spotify-highlight {
+            from {
+                background-color: #1DB954;
+            }
+            to {
+                background-color: #1ed760;
+            }
+        }
+
+        /* YouTube Theme */
+        .youtube-theme { background-color: #282828; }
+        .youtube-theme h2, .youtube-theme h3, .youtube-theme p, .youtube-theme .key-item { color: #ffffff; }
+        .youtube-theme .db-table th { color: #ffffff; }
+        .youtube-theme .db-table td { background-color: #121212; color: #ffffff; border-color: #4d4d4d; }
+        .yt-pk { background-color: #FF0000; }
+        .yt-fk { background-color: #5a5a5a; }
+        .yt-pk-color { background-color: #FF0000; }
+        .yt-fk-color { background-color: #5a5a5a; }
+        .yt-highlight-key { animation: yt-highlight 1s ease-in-out infinite alternate; }
+        @keyframes yt-highlight { from { background-color: #FF0000; } to { background-color: #ff4d4d; } }
+
+
+        .highlight {
+            background-color: #a5b4fc !important;
+            transition: background-color 0.2s ease-in-out;
+        }
+
+        @media (max-width: 768px) {
+            .nav-button {
+                padding: 0.5rem 1rem;
+            }
+            .nav-button.left { left: 1rem; }
+            .nav-button.right { right: 1rem; }
+            .slide {
+                padding: 1.5rem;
+            }
+            .slide-content h1 { font-size: 2rem; }
+            .slide-content h2 { font-size: 1.5rem; }
+            .slide-content p { font-size: 1rem; }
+            .slide-content li { font-size: 1rem; }
+            .key-legend { flex-direction: column; }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+
+    <div id="slides-container" class="slide-container">
+        
+        <!-- Slide 1: Title Slide -->
+        <div class="slide slide-active" id="slide1">
+            <div class="slide-content text-center">
+                <h1 class="text-4xl lg:text-5xl font-extrabold text-indigo-700 leading-tight">Module 5: Database Management System</h1>
+                <h2 class="text-2xl lg:text-3xl font-semibold text-gray-800 mt-2">Lesson 1: Understanding the Database</h2>
+                <h4 class="text-gray-700 mt-2">by Gerald Villaran</h4>
+                <p class="text-lg text-gray-600 mt-4 max-w-2xl mx-auto">An introduction to the fundamental concepts of databases, their structure, and their components.</p>
+            </div>
+        </div>
+
+        <!-- Slide 2: Learning Outcomes -->
+        <div class="slide" id="slide2">
+            <div class="slide-content max-w-2xl mx-auto">
+                <h2 class="text-3xl font-bold text-indigo-700 mb-6">Learning Outcomes</h2>
+                <p class="text-xl text-gray-600 mb-4">At the end of this lesson, you should be able to:</p>
+                <ul class="text-gray-700 text-left space-y-3">
+                    <li>Comprehend the fundamental concepts of databases, including their importance in modern computing.</li>
+                    <li>Understand that a database is an <span class="font-bold text-indigo-600">organized collection of related data</span> that represents some aspect of the real world.</li>
+                    <li>Recognize the basic components of a database, including <span class="font-bold text-indigo-600">tables, rows, columns, and keys.</span></li>
+                    <li>Distinguish between <span class="font-bold text-indigo-600">data and metadata.</span></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 3: What is a Database? -->
+        <div class="slide" id="slide3">
+            <div class="slide-content max-w-3xl mx-auto">
+                <h2 class="text-3xl font-bold text-indigo-700 mb-4">What is a Database?</h2>
+                <p class="text-lg text-gray-600">A database is an <span class="font-bold text-indigo-600">organized collection of related data</span> representing some aspect of the real world, stored and accessed electronically.</p>
+                <p class="text-lg text-gray-600 mt-2">Databases are designed to efficiently manage large amounts of information by providing a <span class="font-bold text-indigo-600">systematic way to store, retrieve, and manipulate data.</span></p>
+                <div class="analogy-box mt-6">
+                    <h3 class="text-xl font-bold text-indigo-800 flex items-center gap-2">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zM5 5h14v14H5zm4 2h6v2H9zm0 4h6v2H9zm0 4h6v2H9z" />
+                        </svg>
+                        Analogy: A Digital Filing Cabinet
+                    </h3>
+                    <p class="mt-2">Think of a database as a highly organized, intelligent filing cabinet.</p>
+                    <ul class="list-disc list-inside mt-2 text-gray-700">
+                        <li>The <span class="font-bold">data</span> are the documents inside the folders.</li>
+                        <li>The database system helps you instantly find, update, and organize these documents without manually searching through every file.</li>
+                    </ul>
+                </div>
+                <p class="text-base text-gray-500 mt-4 italic">For example, if you run a business, you can create a record for each unique customer. These records will contain various attributes like names, phone numbers, and addresses.</p>
+            </div>
+        </div>
+
+        <!-- Slide 4: More Than Just Data: The Self-Describing Nature -->
+        <div class="slide" id="slide4">
+            <div class="slide-content max-w-3xl mx-auto">
+                <h2 class="text-3xl font-bold text-indigo-700 mb-4">More Than Just Data: The Self-Describing Nature</h2>
+                <p class="text-lg text-gray-600">A database contains two key things:</p>
+                <ul class="list-disc list-inside text-left mx-auto max-w-2xl mt-4 space-y-2">
+                    <li><span class="font-bold text-indigo-600">The Data Itself:</span> The actual information you want to store (e.g., customer names, product prices).</li>
+                    <li><span class="font-bold text-indigo-600">Metadata:</span> Data that describes the structure of the data.</li>
+                </ul>
+                <p class="text-lg text-gray-600 mt-4">This metadata makes a database <span class="font-bold text-indigo-600">"self-describing"</span> because it contains information about the relationships between data objects. Knowing how data is organized is crucial for accessing, managing, and modifying it.</p>
+                <p class="text-base text-gray-500 mt-4 italic">In contrast, flat-file systems (like a simple text file or CSV) do not contain metadata, meaning the programs that use them must have this organizational logic built-in separately.</p>
+            </div>
+        </div>
+
+        <!-- Slide 5: Metadata vs. Schema: A Clear Distinction -->
+        <div class="slide" id="slide5">
+            <div class="slide-content max-w-4xl mx-auto">
+                <h2 class="text-3xl font-bold text-indigo-700 mb-4">Metadata vs. Schema: A Clear Distinction</h2>
+                <div class="overflow-x-auto">
+                    <table class="db-table w-full text-left">
+                        <thead>
+                            <tr>
+                                <th class="py-3 px-6 text-sm md:text-base">Concept</th>
+                                <th class="py-3 px-6 text-sm md:text-base">Definition</th>
+                                <th class="py-3 px-6 text-sm md:text-base">Analogy: Building a House</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="py-4 px-6 font-semibold">Metadata</td>
+                                <td class="py-4 px-6">"Data about data." It provides details about individual data elements, such as column names, data types, and constraints.</td>
+                                <td class="py-4 px-6">The <span class="font-bold text-blue-600">specifications on the blueprint.</span> E.g., "This wall must be 10 feet tall," "Use oak for the flooring."</td>
+                            </tr>
+                            <tr>
+                                <td class="py-4 px-6 font-semibold">Schema</td>
+                                <td class="py-4 px-6">The <span class="font-bold text-blue-600">blueprint or logical structure</span> of the entire database. It defines how tables are organized and their relationships.</td>
+                                <td class="py-4 px-6">The <span class="font-bold text-blue-600">entire architectural blueprint</span> of the house. It shows the layout of rooms, where walls connect, and how all components fit together.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="text-lg font-bold text-indigo-600 mt-6 italic">In short, metadata describes the pieces, and the schema is the plan that shows how all the pieces connect.</p>
+            </div>
+        </div>
+
+        <!-- Slide 6: The Data Dictionary: Where Metadata Lives -->
+        <div class="slide" id="slide6">
+            <div class="slide-content max-w-3xl mx-auto">
+                <h2 class="text-3xl font-bold text-indigo-700 mb-4">The Data Dictionary: Where Metadata Lives</h2>
+                <p class="text-lg text-gray-600">The metadata is held within a component called a <span class="font-bold text-indigo-600">data dictionary.</span></p>
+                <p class="text-lg text-gray-600 mt-2">The data dictionary is what describes the components of a database, such as:</p>
+                <ul class="list-disc list-inside text-left mx-auto max-w-md mt-4 space-y-2">
+                    <li>Tables</li>
+                    <li>Rows</li>
+                    <li>Columns</li>
+                    <li>Relationships between tables</li>
+                </ul>
+                <div class="analogy-box mt-6">
+                    <h3 class="text-xl font-bold text-indigo-800 flex items-center gap-2">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M21 21L15 15M10 16a6 6 0 100-12 6 6 0 000 12z" />
+                        </svg>
+                        Analogy: A Library's Card Catalog
+                    </h3>
+                    <ul class="list-disc list-inside mt-2 text-gray-700">
+                        <li><span class="font-bold">The Books:</span> The actual data in your database.</li>
+                        <li><span class="font-bold">The Card Catalog:</span> The data dictionary (metadata). It doesn't contain the stories themselves, but it tells you the book's title (table name), author (column name), genre (data type), and location (relationship), making the book easy to find and understand.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: Database Classification by Size and Scope -->
+        <div class="slide" id="slide7">
+            <div class="slide-content max-w-3xl mx-auto">
+                <h2 class="text-3xl font-bold text-indigo-700 mb-4">Database Classification by Size and Scope</h2>
+                <p class="text-lg text-gray-600">Databases can be classified based on three attributes: <span class="font-bold text-indigo-600">size, number of users, and required technical equipment.</span></p>
+                <ul class="list-disc list-inside text-left mx-auto max-w-xl mt-4 space-y-4">
+                    <li>
+                        <span class="font-bold text-indigo-600">Personal Databases:</span>
+                        <p class="font-normal text-gray-600 pl-4">The smallest type, stored on a user's local computer. Characterized by a basic data structure.</p>
+                    </li>
+                    <li>
+                        <span class="font-bold text-indigo-600">Group Databases:</span>
+                        <p class="font-normal text-gray-600 pl-4">More complex and intended for a department or team. Contains more data and must be accessible from multiple devices simultaneously.</p>
+                    </li>
+                    <li>
+                        <span class="font-bold text-indigo-600">Enterprise Databases:</span>
+                        <p class="font-normal text-gray-600 pl-4">Large and complex, requiring the most reliable hardware for safe storage and maintenance.</p>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 8: Practical Examples of Database Sizes -->
+        <div class="slide" id="slide8">
+            <div class="slide-content max-w-3xl mx-auto">
+                <h2 class="text-3xl font-bold text-indigo-700 mb-4">Practical Examples of Database Sizes</h2>
+                <ul class="list-disc list-inside text-left mx-auto max-w-xl mt-4 space-y-4">
+                    <li>
+                        <span class="font-bold text-indigo-600">Personal Database:</span>
+                        <p class="font-normal text-gray-600 pl-4">Your smartphone's contact list. It's stored on your device and has a simple structure (Name, Phone Number, Email).</p>
+                    </li>
+                    <li>
+                        <span class="font-bold text-indigo-600">Group Database:</span>
+                        <p class="font-normal text-gray-600 pl-4">A university's course registration system for the Computer Science department. Multiple faculty, staff, and students access it to manage schedules.</p>
+                    </li>
+                    <li>
+                        <span class="font-bold text-indigo-600">Enterprise Database:</span>
+                        <p class="font-normal text-gray-600 pl-4">Amazon's e-commerce platform. It manages millions of products, customers, and transactions simultaneously from around the globe.</p>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 9: The Fundamental Structure: The Table -->
+        <div class="slide" id="slide9">
+            <div class="slide-content max-w-4xl mx-auto">
+                <h2 class="text-3xl font-bold text-indigo-700 mb-4">The Fundamental Structure: The Table</h2>
+                <p class="text-lg text-gray-600">In a relational database, <span class="font-bold text-indigo-600">tables are the fundamental structures that organize and save data.</span></p>
+                <p class="text-lg text-gray-600 mt-2">A table is a collection of related data arranged in <span class="font-bold text-indigo-600">rows and columns.</span> This structure makes it easier to understand, compare, retrieve, and manipulate information.</p>
+                <div class="interactive-section mt-8">
+                    <h3 class="text-xl font-bold text-gray-800">Example: A <span class="font-semibold text-orange-500">Students</span> table</h3>
+                    <table class="db-table mt-4 w-full">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Age</th>
+                                <th>Course</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>101</td>
+                                <td>Michael</td>
+                                <td>22</td>
+                                <td>Computer Science</td>
+                            </tr>
+                            <tr>
+                                <td>102</td>
+                                <td>Rodolfo</td>
+                                <td>21</td>
+                                <td>Electrical Eng.</td>
+                            </tr>
+                            <tr>
+                                <td>103</td>
+                                <td>Vanessa</td>
+                                <td>23</td>
+                                <td>Computer Science</td>
+                            </tr>
+                            <tr>
+                                <td>104</td>
+                                <td>Priya</td>
+                                <td>20</td>
+                                <td>Mechanical Eng.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p class="text-xs text-gray-500 mt-2">This is a static representation of a database table.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 10: Anatomy of a Table: Columns and Rows -->
+        <div class="slide" id="slide10">
+            <div class="slide-content max-w-4xl mx-auto">
+                <h2 class="text-3xl font-bold text-indigo-700 mb-4">Anatomy of a Table: Columns and Rows</h2>
+                <div class="relative w-full max-w-3xl mx-auto">
+                    <div class="flex items-center justify-center p-4">
+                        <button id="highlight-row-btn" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-full transition-colors duration-300 transform hover:scale-105 mr-4">Highlight a Row</button>
+                        <button id="highlight-col-btn" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2 px-4 rounded-full transition-colors duration-300 transform hover:scale-105">Highlight a Column</button>
+                    </div>
+                    <table id="anatomy-table" class="db-table mt-4 w-full">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Age</th>
+                                <th>Course</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr id="row-2">
+                                <td>102</td>
+                                <td>Dodong</td>
+                                <td>21</td>
+                                <td>Electrical Eng.</td>
+                            </tr>
+                            <tr>
+                                <td>101</td>
+                                <td>Miyong</td>
+                                <td>22</td>
+                                <td>Computer Science</td>
+                            </tr>
+                            <tr id="row-4">
+                                <td>104</td>
+                                <td>Mellisa</td>
+                                <td>20</td>
+                                <td>Mechanical Eng.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="text-lg text-gray-600 mt-8">Click the buttons to see the difference between rows and columns!</p>
+            </div>
+        </div>
+
+        <!-- Slide 11: The Keys to Organization: Primary & Foreign Keys -->
+        <div class="slide" id="slide11">
+            <div class="slide-content max-w-4xl mx-auto">
+                <h2 class="text-3xl font-bold text-indigo-700 mb-4">The Keys to Organization: Primary & Foreign Keys</h2>
+                <p class="text-lg text-gray-600">Keys are special columns that define relationships and ensure data integrity.</p>
+                <div class="flex flex-col md:flex-row gap-8 mt-6">
+                    <div class="flex-1 text-left">
+                        <h3 class="text-xl font-bold text-orange-600 flex items-center gap-2">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2v4a2 2 0 01-2 2h-4a2 2 0 01-2-2v-4a2 2 0 012-2h4z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14v6m0 0l-3-3m3 3l3-3" />
+                            </svg>
+                            Primary Key
+                        </h3>
+                        <ul class="list-disc list-inside mt-2 text-gray-700 space-y-2">
+                            <li>A column that serves as a <span class="font-bold text-orange-600">unique identifier for each row</span> in a table.</li>
+                            <li>It cannot be null (empty), and there can only be one primary key per table.</li>
+                            <li><span class="font-bold text-indigo-600">Example:</span> In a <span class="font-semibold italic">Students</span> table, the <span class="font-semibold">ID</span> column is the primary key because no two students can have the same ID.</li>
+                        </ul>
+                    </div>
+                    <div class="flex-1 text-left">
+                        <h3 class="text-xl font-bold text-sky-600 flex items-center gap-2">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.172-1.172m-1.172 1.172a4 4 0 005.656 0l4-4a4 4 0 10-5.656-5.656l-1.172 1.172" />
+                            </svg>
+                            Foreign Key
+                        </h3>
+                        <ul class="list-disc list-inside mt-2 text-gray-700 space-y-2">
+                            <li>A column in one table that <span class="font-bold text-sky-600">refers to the primary key of another table.</span></li>
+                            <li>It establishes a link or relationship between the two tables.</li>
+                            <li>A foreign key can be null, and a table can have multiple foreign keys.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 12: Keys in Action: A Practical Scenario -->
+        <div class="slide" id="slide12">
+            <div class="slide-content max-w-4xl mx-auto">
+                <h2 class="text-3xl font-bold text-indigo-700 mb-4">Keys in Action: A Practical Scenario</h2>
+                <p class="text-lg text-gray-600">Click a <span class="font-bold text-orange-500">primary key</span> to see the magic!</p>
+                <div class="relative table-container">
+                    <!-- Students Table -->
+                    <div class="relative w-full max-w-xl mx-auto">
+                        <h3 class="font-bold text-gray-800 mb-2">Students Table</h3>
+                        <table id="students-table" class="db-table students-table">
+                            <thead>
+                                <tr>
+                                    <th class="pk-col" data-col="id">StudentID</th>
+                                    <th>Name</th>
+                                    <th>Age</th>
+                                    <th class="fk-col" data-col="dept_id">Dept_ID</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr data-id="1">
+                                    <td class="pk-cell" data-val="101">101</td>
+                                    <td>Charo</td>
+                                    <td>22</td>
+                                    <td class="fk-cell" data-ref="1">1</td>
+                                </tr>
+                                <tr data-id="2">
+                                    <td class="pk-cell" data-val="102">102</td>
+                                    <td>Jessica</td>
+                                    <td>21</td>
+                                    <td class="fk-cell" data-ref="2">2</td>
+                                </tr>
+                                <tr data-id="3">
+                                    <td class="pk-cell" data-val="103">103</td>
+                                    <td>Inday Badiday</td>
+                                    <td>23</td>
+                                    <td class="fk-cell" data-ref="1">1</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Departments Table -->
+                    <div class="relative w-full max-w-sm mx-auto">
+                        <h3 class="font-bold text-gray-800 mb-2">Departments Table</h3>
+                        <table id="departments-table" class="db-table departments-table">
+                            <thead>
+                                <tr>
+                                    <th class="pk-col" data-col="dept_id">Dept_ID</th>
+                                    <th>DepartmentName</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr data-id="1">
+                                    <td class="pk-cell" data-val="1">1</td>
+                                    <td>Computer Science</td>
+                                </tr>
+                                <tr data-id="2">
+                                    <td class="pk-cell" data-val="2">2</td>
+                                    <td>Electrical Eng.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="key-legend">
+                        <div class="key-item"><div class="color-box pk-color"></div>Primary Key</div>
+                        <div class="key-item"><div class="color-box fk-color"></div>Foreign Key</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 12b: Advanced Keys: The Linking Table -->
+        <div class="slide spotify-theme" id="slide12b">
+            <div class="slide-content max-w-4xl mx-auto">
+                <div class="flex items-center justify-center mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512" class="w-12 h-12 mr-4"><path fill="#1DB954" d="M248 8C111.1 8 0 119.1 0 256s111.1 248 248 248 248-111.1 248-248S384.9 8 248 8Z"/><path fill="#191414" d="M406.6 231.1c-5.2 0-8.4-1.3-12.9-3.9-71.2-42.5-198.5-52.7-280.9-29.7-3.6 1-8.1 2.6-12.9 2.6-13.2 0-23.3-10.3-23.3-23.6 0-13.6 8.4-21.3 17.4-23.9 35.2-10.3 74.6-15.2 117.5-15.2 73 0 149.5 15.2 205.4 47.8 7.8 4.5 12.9 10.7 12.9 22.6 0 13.6-11 23.3-23.2 23.3zm-31 76.2c-5.2 0-8.7-2.3-12.3-4.2-62.5-37-155.7-51.9-238.6-29.4-4.8 1.3-7.4 2.6-11.9 2.6-10.7 0-19.4-8.7-19.4-19.4s5.2-17.8 15.5-20.7c27.8-7.8 56.2-13.6 97.8-13.6 64.9 0 127.6 16.1 177 45.5 8.1 4.8 11.3 11 11.3 19.7-.1 10.8-8.5 19.5-19.4 19.5zm-26.9 65.6c-4.2 0-6.8-1.3-10.7-3.6-62.4-37.6-135-39.2-206.7-24.5-3.9 1-9 2.6-11.9 2.6-9.7 0-15.8-7.7-15.8-15.8 0-10.3 6.1-15.2 13.6-16.8 81.9-18.1 165.6-16.5 237 26.2 6.1 3.9 9.7 7.4 9.7 16.5s-7.1 15.4-15.2 15.4z"/></svg>
+                    <h2 class="text-3xl font-bold">The Linking Table: The Spotify Example</h2>
+                </div>
+                <p class="text-lg">A <span class="font-bold">linking table</span> is used to resolve a many-to-many relationship. It contains foreign keys that reference the primary keys of the two tables it connects.</p>
+                
+                <div class="relative table-container">
+                    <!-- Tracks Table -->
+                    <div class="relative w-full max-w-md mx-auto">
+                        <h3 class="font-bold mb-2">Tracks Table</h3>
+                        <table id="spotify-tracks-table" class="db-table">
+                            <thead><tr><th class="spotify-pk">TrackID</th><th>TrackName</th><th>Artist</th></tr></thead>
+                            <tbody>
+                                <tr data-id="1"><td class="spotify-pk-cell" data-val="1">1</td><td>Bohemian Rhapsody</td><td>Queen</td></tr>
+                                <tr data-id="2"><td class="spotify-pk-cell" data-val="2">2</td><td>Blinding Lights</td><td>The Weeknd</td></tr>
+                                <tr data-id="3"><td class="spotify-pk-cell" data-val="3">3</td><td>Shape of You</td><td>Ed Sheeran</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- Playlists Table -->
+                    <div class="relative w-full max-w-md mx-auto">
+                        <h3 class="font-bold mb-2">Playlists Table</h3>
+                        <table id="spotify-playlists-table" class="db-table">
+                            <thead><tr><th class="spotify-pk">PlaylistID</th><th>PlaylistName</th><th>Creator</th></tr></thead>
+                            <tbody>
+                                <tr data-id="101"><td class="spotify-pk-cell" data-val="101">101</td><td>Rock Classics</td><td>Alice</td></tr>
+                                <tr data-id="102"><td class="spotify-pk-cell" data-val="102">102</td><td>Top Hits</td><td>Bob</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- PlaylistTracks Table -->
+                    <div class="relative w-full max-w-xl mx-auto">
+                        <h3 class="font-bold mb-2">PlaylistTracks (Linking Table)</h3>
+                        <table id="spotify-playlist-tracks-table" class="db-table">
+                            <thead><tr><th class="spotify-pk">ID</th><th class="spotify-fk">PlaylistID</th><th class="spotify-fk">TrackID</th><th>DateAdded</th></tr></thead>
+                            <tbody>
+                                <tr><td>1</td><td class="spotify-fk-cell" data-ref-playlist="101">101</td><td class="spotify-fk-cell" data-ref-track="1">1</td><td>2023-01-10</td></tr>
+                                <tr><td>2</td><td class="spotify-fk-cell" data-ref-playlist="102">102</td><td class="spotify-fk-cell" data-ref-track="2">2</td><td>2023-01-11</td></tr>
+                                <tr><td>3</td><td class="spotify-fk-cell" data-ref-playlist="102">102</td><td class="spotify-fk-cell" data-ref-track="3">3</td><td>2023-01-12</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="key-legend">
+                        <div class="key-item"><div class="color-box spotify-pk-color"></div>Primary Key</div>
+                        <div class="key-item"><div class="color-box spotify-fk-color"></div>Foreign Key</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 12c: Advanced Keys: A YouTube Example -->
+        <div class="slide youtube-theme" id="slide12c">
+            <div class="slide-content max-w-4xl mx-auto">
+                <div class="flex items-center justify-center mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 110" class="w-12 h-12 mr-4 flex-shrink-0">
+                      <path fill="#FF0000" d="M154.3,17.5c-1.8-6.7-7.1-12-13.8-13.8c-12.1-3.3-60.8-3.3-60.8-3.3S31,0.5,18.9,3.8
+                        c-6.7,1.8-12,7.1-13.8,13.8C1.9,29.7,1.9,55,1.9,55s0,25.3,3.3,37.5c1.8,6.7,7.1,12,13.8,13.8c12.1,3.3,60.8,3.3,60.8,3.3
+                        s48.7,0,60.8-3.3c6.7-1.8,12-7.1,13.8-13.8c3.3-12.1,3.3-37.5,3.3-37.5S157.6,29.7,154.3,17.5z"/>
+                      <polygon fill="#FFFFFF" points="64.2,78.4 104.6,55 64.2,31.6"/>
+                    </svg>
+                    <h2 class="text-3xl font-bold">Advanced Keys: A YouTube Example</h2>
+                  </div>
+                <p class="text-lg">The <span class="font-bold">Comments</span> table links <span class="font-bold">Users</span> and <span class="font-bold">Videos</span>. It has two foreign keys, one for `UserID` and one for `VideoID`.</p>
+                
+                <div class="relative table-container">
+                    <!-- Users Table -->
+                    <div class="relative w-full max-w-sm mx-auto">
+                        <h3 class="font-bold mb-2">Users Table</h3>
+                        <table id="yt-users-table" class="db-table">
+                            <thead><tr><th class="yt-pk">UserID</th><th>UserName</th></tr></thead>
+                            <tbody>
+                                <tr data-id="1"><td class="yt-pk-cell" data-val="1">1</td><td>CodeMaster</td></tr>
+                                <tr data-id="2"><td class="yt-pk-cell" data-val="2">2</td><td>GamerGirl</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- Videos Table -->
+                    <div class="relative w-full max-w-lg mx-auto">
+                        <h3 class="font-bold mb-2">Videos Table</h3>
+                        <table id="yt-videos-table" class="db-table">
+                            <thead><tr><th class="yt-pk">VideoID</th><th>Title</th><th class="yt-fk">UploaderID</th></tr></thead>
+                            <tbody>
+                                <tr data-id="101"><td class="yt-pk-cell" data-val="101">101</td><td>Awra Farming 101</td><td class="yt-fk-cell" data-ref-user="1">1</td></tr>
+                                <tr data-id="102"><td class="yt-pk-cell" data-val="102">102</td><td>Let's Play: DB Legends</td><td class="yt-fk-cell" data-ref-user="2">2</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- Comments Table -->
+                    <div class="relative w-full max-w-xl mx-auto">
+                        <h3 class="font-bold mb-2">Comments (Linking Table)</h3>
+                        <table id="yt-comments-table" class="db-table">
+                            <thead><tr><th class="yt-pk">CommentID</th><th class="yt-fk">VideoID</th><th class="yt-fk">UserID</th><th>Comment</th></tr></thead>
+                            <tbody>
+                                <tr><td>1</td><td class="yt-fk-cell" data-ref-video="101">101</td><td class="yt-fk-cell" data-ref-user="2">2</td><td>"Great video!"</td></tr>
+                                <tr><td>2</td><td class="yt-fk-cell" data-ref-video="102">102</td><td class="yt-fk-cell" data-ref-user="1">1</td><td>"Awesome gameplay!"</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="key-legend">
+                        <div class="key-item"><div class="color-box yt-pk-color"></div>Primary Key</div>
+                        <div class="key-item"><div class="color-box yt-fk-color"></div>Foreign Key</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 13: Summary -->
+        <div class="slide" id="slide13">
+            <div class="slide-content max-w-3xl mx-auto">
+                <h2 class="text-3xl font-bold text-indigo-700 mb-4">Summary</h2>
+                <ul class="list-disc list-inside text-left mx-auto max-w-xl space-y-3 text-lg text-gray-700">
+                    <li>A <span class="font-bold text-indigo-600">database</span> is a structured collection of data, made "self-describing" by its <span class="font-bold text-indigo-600">metadata.</span></li>
+                    <li><span class="font-bold text-indigo-600">Metadata</span> describes the data, while the <span class="font-bold text-indigo-600">schema</span> provides the overall blueprint for the database structure.</li>
+                    <li>Databases can be classified as <span class="font-bold text-indigo-600">Personal, Group, or Enterprise</span> based on their scale and use.</li>
+                    <li>The core component of a relational database is the <span class="font-bold text-indigo-600">table,</span> which organizes data into <span class="font-bold text-indigo-600">rows (records)</span> and <span class="font-bold text-indigo-600">columns (fields).</span></li>
+                    <li><span class="font-bold text-indigo-600">Primary keys</span> uniquely identify each row in a table, while <span class="font-bold text-indigo-600">foreign keys</span> link tables together, forming relationships.</li>
+                </ul>
+            </div>
+        </div>
+
+    </div>
+
+    <button id="prev-btn" class="nav-button left hidden">Previous</button>
+    <button id="next-btn" class="nav-button right">Next</button>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const slides = document.querySelectorAll('.slide');
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            let currentSlideIndex = 0;
+
+            const showSlide = (index) => {
+                slides.forEach((slide, i) => {
+                    slide.classList.remove('slide-active');
+                    if (i === index) {
+                        slide.classList.add('slide-active');
+                    }
+                });
+
+                prevBtn.classList.toggle('hidden', index === 0);
+                nextBtn.classList.toggle('hidden', index === slides.length - 1);
+            };
+
+            prevBtn.addEventListener('click', () => {
+                if (currentSlideIndex > 0) {
+                    currentSlideIndex--;
+                    showSlide(currentSlideIndex);
+                }
+            });
+
+            nextBtn.addEventListener('click', () => {
+                if (currentSlideIndex < slides.length - 1) {
+                    currentSlideIndex++;
+                    showSlide(currentSlideIndex);
+                }
+            });
+
+            // Slide 10: Rows and Columns Interactivity
+            const rowBtn = document.getElementById('highlight-row-btn');
+            const colBtn = document.getElementById('highlight-col-btn');
+            const anatomyTable = document.getElementById('anatomy-table');
+            let isAnimating = false;
+
+            const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+            rowBtn.addEventListener('click', async () => {
+                if (isAnimating) return;
+                isAnimating = true;
+                rowBtn.disabled = true;
+                colBtn.disabled = true;
+
+                const rows = [...anatomyTable.querySelectorAll('tbody tr')];
+                for (const row of rows) {
+                    const cells = [...row.cells];
+                    cells.forEach(cell => cell.classList.add('highlight'));
+                    await sleep(800);
+                    cells.forEach(cell => cell.classList.remove('highlight'));
+                }
+
+                isAnimating = false;
+                rowBtn.disabled = false;
+                colBtn.disabled = false;
+            });
+
+            colBtn.addEventListener('click', async () => {
+                if (isAnimating) return;
+                isAnimating = true;
+                rowBtn.disabled = true;
+                colBtn.disabled = true;
+
+                const numCols = anatomyTable.querySelector('thead tr').children.length;
+                for (let i = 0; i < numCols; i++) {
+                    const cells = [...anatomyTable.querySelectorAll(`tr > *:nth-child(${i + 1})`)];
+                    cells.forEach(cell => cell.classList.add('highlight'));
+                    await sleep(800);
+                    cells.forEach(cell => cell.classList.remove('highlight'));
+                }
+
+                isAnimating = false;
+                rowBtn.disabled = false;
+                colBtn.disabled = false;
+            });
+            
+            // Slide 12: Primary and Foreign Key Interactivity
+            const studentsTable = document.getElementById('students-table');
+            const departmentsTable = document.getElementById('departments-table');
+            
+            studentsTable.addEventListener('click', (e) => {
+                const pkCell = e.target.closest('.pk-cell');
+                if (pkCell) {
+                    const pkValue = pkCell.dataset.val;
+                    
+                    // Clear all highlights and lines
+                    studentsTable.querySelectorAll('.pk-cell, .fk-cell').forEach(cell => cell.classList.remove('highlight-pk', 'highlight-fk'));
+                    departmentsTable.querySelectorAll('.pk-cell').forEach(cell => cell.classList.remove('highlight-pk'));
+
+                    // Highlight the clicked PK
+                    pkCell.classList.add('highlight-pk');
+                    
+                    // Find and highlight matching FK cells
+                    studentsTable.querySelectorAll(`.fk-cell[data-ref="${pkValue}"]`).forEach(cell => {
+                        cell.classList.add('highlight-fk');
+                    });
+                }
+            });
+
+            departmentsTable.addEventListener('click', (e) => {
+                const pkCell = e.target.closest('.pk-cell');
+                if (pkCell) {
+                    const pkValue = pkCell.dataset.val;
+
+                    // Clear all highlights and lines
+                    studentsTable.querySelectorAll('.pk-cell, .fk-cell').forEach(cell => cell.classList.remove('highlight-pk', 'highlight-fk'));
+                    departmentsTable.querySelectorAll('.pk-cell').forEach(cell => cell.classList.remove('highlight-pk'));
+                    
+                    // Highlight the clicked PK
+                    pkCell.classList.add('highlight-pk');
+
+                    // Find and highlight matching FK cells
+                    studentsTable.querySelectorAll(`.fk-cell[data-ref="${pkValue}"]`).forEach(cell => {
+                        cell.classList.add('highlight-fk');
+                    });
+                }
+            });
+
+            // Slide 12b: Spotify Linking Table Interactivity
+            const spotifyTracksTable = document.getElementById('spotify-tracks-table');
+            const spotifyPlaylistsTable = document.getElementById('spotify-playlists-table');
+            const spotifyPlaylistTracksTable = document.getElementById('spotify-playlist-tracks-table');
+
+            const clearSpotifyHighlights = () => {
+                document.querySelectorAll('#slide12b .spotify-pk-cell, #slide12b .spotify-fk-cell').forEach(cell => {
+                    cell.classList.remove('highlight-key');
+                });
+            };
+
+            spotifyTracksTable.addEventListener('click', (e) => {
+                const pkCell = e.target.closest('.spotify-pk-cell');
+                if (!pkCell) return;
+                
+                clearSpotifyHighlights();
+                const trackId = pkCell.dataset.val;
+                pkCell.classList.add('highlight-key');
+                spotifyPlaylistTracksTable.querySelectorAll(`td[data-ref-track="${trackId}"]`).forEach(cell => {
+                    cell.classList.add('highlight-key');
+                });
+            });
+
+            spotifyPlaylistsTable.addEventListener('click', (e) => {
+                const pkCell = e.target.closest('.spotify-pk-cell');
+                if (!pkCell) return;
+
+                clearSpotifyHighlights();
+                const playlistId = pkCell.dataset.val;
+                pkCell.classList.add('highlight-key');
+                spotifyPlaylistTracksTable.querySelectorAll(`td[data-ref-playlist="${playlistId}"]`).forEach(cell => {
+                    cell.classList.add('highlight-key');
+                });
+            });
+
+            // Slide 12c: YouTube Comments Interactivity
+            const ytUsersTable = document.getElementById('yt-users-table');
+            const ytVideosTable = document.getElementById('yt-videos-table');
+            const ytCommentsTable = document.getElementById('yt-comments-table');
+
+            const clearYouTubeHighlights = () => {
+                document.querySelectorAll('#slide12c .yt-pk-cell, #slide12c .yt-fk-cell').forEach(cell => {
+                    cell.classList.remove('yt-highlight-key');
+                });
+            };
+
+            ytUsersTable.addEventListener('click', (e) => {
+                const pkCell = e.target.closest('.yt-pk-cell');
+                if (!pkCell) return;
+
+                clearYouTubeHighlights();
+                const userId = pkCell.dataset.val;
+                pkCell.classList.add('yt-highlight-key');
+                ytVideosTable.querySelectorAll(`td[data-ref-user="${userId}"]`).forEach(cell => cell.classList.add('yt-highlight-key'));
+                ytCommentsTable.querySelectorAll(`td[data-ref-user="${userId}"]`).forEach(cell => cell.classList.add('yt-highlight-key'));
+            });
+
+            ytVideosTable.addEventListener('click', (e) => {
+                const pkCell = e.target.closest('.yt-pk-cell');
+                if (!pkCell) return;
+
+                clearYouTubeHighlights();
+                const videoId = pkCell.dataset.val;
+                pkCell.classList.add('yt-highlight-key');
+                ytCommentsTable.querySelectorAll(`td[data-ref-video="${videoId}"]`).forEach(cell => cell.classList.add('yt-highlight-key'));
+            });
+        });
+    </script>
+
+</body>
+</html>
